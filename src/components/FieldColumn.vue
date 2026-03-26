@@ -52,7 +52,7 @@ function tapGoalieToBench() {
 <template>
   <div class="flex flex-col h-full">
     <h2 class="text-sm font-bold text-green-400 uppercase tracking-wider mb-2 px-1">
-      Field
+      Field ({{ fieldPlayers.length + (goalie ? 1 : 0) }})
     </h2>
 
     <!-- Goalie slot -->
