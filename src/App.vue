@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import QrcodeVue from 'qrcode.vue'
 import { useGameState } from './composables/useGameState.js'
 import FieldColumn from './components/FieldColumn.vue'
 import BenchColumn from './components/BenchColumn.vue'
@@ -12,6 +13,8 @@ const game = useGameState()
 
 const currentView = ref('game') // 'game', 'roster', 'settings', 'history'
 const menuOpen = ref(false)
+const showShare = ref(false)
+const appUrl = 'https://managethebench.netlify.app'
 const tick = ref(0)
 
 // Force re-render every 500ms for timer updates
@@ -221,6 +224,14 @@ function updateSettings(newSettings) {
               Start Game
             </button>
           </div>
+
+          <!-- Share button -->
+          <button
+            @click="showShare = true"
+            class="mt-6 text-slate-400 hover:text-white text-sm transition-colors"
+          >
+            Share this app
+          </button>
         </div>
 
         <!-- Active game: controls + field/bench -->
@@ -305,5 +316,23 @@ function updateSettings(newSettings) {
         />
       </div>
     </main>
+
+    <!-- Share QR overlay -->
+    <div
+      v-if="showShare"
+      @click="showShare = false"
+      class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center gap-6 p-8"
+    >
+      <h2 class="text-2xl font-bold text-slate-800">The Bench</h2>
+      <QrcodeVue :value="appUrl" :size="250" level="M" />
+      <p class="text-slate-600 text-sm text-center">Scan to open the app</p>
+      <p class="text-blue-600 text-xs">{{ appUrl }}</p>
+      <button
+        @click.stop="showShare = false"
+        class="mt-4 bg-slate-800 text-white px-6 py-2 rounded-lg text-sm font-medium"
+      >
+        Close
+      </button>
+    </div>
   </div>
 </template>
