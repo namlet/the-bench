@@ -50,7 +50,7 @@ function doEnd() {
         <button
           @click="$emit('start')"
           :disabled="rosterSize < 1"
-          class="bg-green-600 hover:bg-green-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-5 py-2 rounded-lg text-sm transition-colors"
+          class="bg-green-600 hover:bg-green-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold px-8 py-4 rounded-xl text-lg w-full transition-colors"
         >
           Start Game
         </button>

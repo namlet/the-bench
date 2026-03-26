@@ -156,7 +156,7 @@ function updateSettings(newSettings) {
         <button
           v-for="tab in [
             { key: 'game', label: 'Game' },
-            { key: 'roster', label: 'Roster' },
+            { key: 'roster', label: 'Teams' },
             { key: 'history', label: 'History' },
             { key: 'settings', label: 'Settings' },
           ]"
@@ -196,10 +196,31 @@ function updateSettings(newSettings) {
           @end="game.endGame"
         />
 
-        <div v-if="!game.gameActive.value" class="text-center text-slate-500 text-sm py-8">
-          <p v-if="!game.activeTeam.value">Create a team in the Roster tab to get started.</p>
-          <p v-else-if="game.roster.value.length === 0">Add players to {{ game.activeTeam.value.name }} in the Roster tab.</p>
-          <p v-else>{{ game.activeTeam.value.name }} ready! Tap "Start Game" to begin.</p>
+        <div v-if="!game.gameActive.value" class="py-4">
+          <!-- Team selector on game page -->
+          <div v-if="game.teams.value.length" class="mb-4">
+            <div class="text-xs text-slate-400 uppercase tracking-wider mb-2 px-1">Select Team</div>
+            <div class="space-y-1">
+              <button
+                v-for="team in game.teams.value"
+                :key="team.id"
+                @click="game.setActiveTeam(team.id)"
+                :class="team.id === game.activeTeamId.value
+                  ? 'bg-blue-600/30 border-blue-500/50'
+                  : 'bg-slate-700/30 border-transparent hover:bg-slate-700/50'"
+                class="w-full flex items-center justify-between rounded-lg px-4 py-3 border transition-colors"
+              >
+                <span class="text-white text-sm font-medium">{{ team.name }}</span>
+                <span class="text-slate-400 text-xs">{{ team.players.length }} players</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="text-center text-slate-500 text-sm">
+            <p v-if="!game.teams.value.length">Create a team in the Teams menu to get started.</p>
+            <p v-else-if="!game.activeTeam.value">Select a team above.</p>
+            <p v-else-if="game.roster.value.length === 0">Add players to {{ game.activeTeam.value.name }} in the Teams menu.</p>
+          </div>
         </div>
 
         <div v-else class="grid grid-cols-2 gap-3 flex-1">
