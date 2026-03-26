@@ -55,7 +55,10 @@ function getPlayerBenchTime(game, playerId) {
         class="w-full text-left bg-slate-700/30 hover:bg-slate-700/50 rounded-lg px-3 py-2 transition-colors"
       >
         <div class="flex justify-between items-center">
-          <span class="text-sm text-white font-medium">{{ formatDate(game.date) }}</span>
+          <div>
+            <span class="text-sm text-white font-medium">{{ formatDate(game.date) }}</span>
+            <span v-if="game.teamName" class="text-xs text-blue-400 ml-2">{{ game.teamName }}</span>
+          </div>
           <span class="text-xs text-slate-400">{{ game.roster.length }} players</span>
         </div>
       </button>

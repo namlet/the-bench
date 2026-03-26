@@ -165,7 +165,7 @@ function updateSettings(newSettings) {
           :gameActive="game.gameActive.value"
           :gamePaused="game.gamePaused.value"
           :isHalftime="game.isHalftime.value"
-          :rosterSize="game.roster.value.length"
+          :rosterSize="game.activeTeam.value ? game.roster.value.length : 0"
           :swapSuggestions="swapSuggestions"
           :gameElapsedMs="gameElapsedMs()"
           @start="game.startGame"
@@ -176,8 +176,9 @@ function updateSettings(newSettings) {
         />
 
         <div v-if="!game.gameActive.value" class="text-center text-slate-500 text-sm py-8">
-          <p v-if="game.roster.value.length === 0">Add players in the Roster tab, then start a game.</p>
-          <p v-else>Ready! Tap "Start Game" to begin.</p>
+          <p v-if="!game.activeTeam.value">Create a team in the Roster tab to get started.</p>
+          <p v-else-if="game.roster.value.length === 0">Add players to {{ game.activeTeam.value.name }} in the Roster tab.</p>
+          <p v-else>{{ game.activeTeam.value.name }} ready! Tap "Start Game" to begin.</p>
         </div>
 
         <div v-else class="grid grid-cols-2 gap-3 flex-1">
@@ -218,8 +219,14 @@ function updateSettings(newSettings) {
       <!-- Roster View -->
       <div v-if="currentView === 'roster'">
         <TeamManager
+          :teams="game.teams.value"
+          :activeTeamId="game.activeTeamId.value"
           :roster="game.roster.value"
           :gameActive="game.gameActive.value"
+          @add-team="game.addTeam"
+          @update-team="game.updateTeam"
+          @remove-team="game.removeTeam"
+          @set-active-team="game.setActiveTeam"
           @add="game.addPlayer"
           @update="game.updatePlayer"
           @remove="game.removePlayer"

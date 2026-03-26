@@ -2,7 +2,8 @@ import { ref, computed, watch } from 'vue'
 import { useLocalStorage } from './useLocalStorage.js'
 
 export function useGameState() {
-  const roster = useLocalStorage('bench-roster', [])
+  const teams = useLocalStorage('bench-teams', [])
+  const activeTeamId = useLocalStorage('bench-active-team', null)
   const settings = useLocalStorage('bench-settings', {
     redThresholdMinutes: 7,
     enableSound: false,
@@ -34,27 +35,70 @@ export function useGameState() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
   }
 
-  // Roster management
-  function addPlayer(name, jerseyNumber, isGoalie = false) {
+  // Active team
+  const activeTeam = computed(() => {
+    if (!activeTeamId.value) return null
+    return teams.value.find(t => t.id === activeTeamId.value) || null
+  })
+
+  // Roster is the active team's players
+  const roster = computed(() => {
+    return activeTeam.value ? activeTeam.value.players : []
+  })
+
+  // Team management
+  function addTeam(name) {
+    const team = {
+      id: generateId(),
+      name,
+      players: [],
+    }
+    teams.value.push(team)
+    activeTeamId.value = team.id
+    return team
+  }
+
+  function updateTeam(id, updates) {
+    const idx = teams.value.findIndex(t => t.id === id)
+    if (idx !== -1) {
+      teams.value[idx] = { ...teams.value[idx], ...updates }
+    }
+  }
+
+  function removeTeam(id) {
+    teams.value = teams.value.filter(t => t.id !== id)
+    if (activeTeamId.value === id) {
+      activeTeamId.value = teams.value.length ? teams.value[0].id : null
+    }
+  }
+
+  function setActiveTeam(id) {
+    activeTeamId.value = id
+  }
+
+  // Roster management (operates on active team)
+  function addPlayer(name, jerseyNumber) {
+    if (!activeTeam.value) return null
     const player = {
       id: generateId(),
       name,
       jerseyNumber,
-      isGoalie,
     }
-    roster.value.push(player)
+    activeTeam.value.players.push(player)
     return player
   }
 
   function updatePlayer(id, updates) {
-    const idx = roster.value.findIndex(p => p.id === id)
+    if (!activeTeam.value) return
+    const idx = activeTeam.value.players.findIndex(p => p.id === id)
     if (idx !== -1) {
-      roster.value[idx] = { ...roster.value[idx], ...updates }
+      activeTeam.value.players[idx] = { ...activeTeam.value.players[idx], ...updates }
     }
   }
 
   function removePlayer(id) {
-    roster.value = roster.value.filter(p => p.id !== id)
+    if (!activeTeam.value) return
+    activeTeam.value.players = activeTeam.value.players.filter(p => p.id !== id)
   }
 
   function now() {
@@ -146,6 +190,8 @@ export function useGameState() {
     const gameRecord = {
       id: generateId(),
       date: new Date().toISOString(),
+      teamId: activeTeamId.value,
+      teamName: activeTeam.value ? activeTeam.value.name : 'Unknown',
       events: [...gameEvents.value],
       playerTimers: JSON.parse(JSON.stringify(timers)),
       roster: roster.value.map(p => ({ ...p })),
@@ -333,7 +379,25 @@ export function useGameState() {
     return swaps
   }
 
+  // Migrate legacy single-roster data to teams format
+  function migrateLegacyRoster() {
+    const legacyRoster = localStorage.getItem('bench-roster')
+    if (legacyRoster) {
+      const players = JSON.parse(legacyRoster)
+      if (players.length > 0 && teams.value.length === 0) {
+        const team = addTeam('My Team')
+        team.players = players
+      }
+      localStorage.removeItem('bench-roster')
+    }
+  }
+
+  migrateLegacyRoster()
+
   return {
+    teams,
+    activeTeamId,
+    activeTeam,
     roster,
     settings,
     gameHistory,
@@ -345,6 +409,10 @@ export function useGameState() {
     goalie,
     gameEvents,
     playerTimers,
+    addTeam,
+    updateTeam,
+    removeTeam,
+    setActiveTeam,
     addPlayer,
     updatePlayer,
     removePlayer,
