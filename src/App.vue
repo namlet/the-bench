@@ -11,6 +11,7 @@ import GameHistory from './components/GameHistory.vue'
 const game = useGameState()
 
 const currentView = ref('game') // 'game', 'roster', 'settings', 'history'
+const menuOpen = ref(false)
 const tick = ref(0)
 
 // Force re-render every 500ms for timer updates
@@ -133,29 +134,49 @@ function updateSettings(newSettings) {
 <template>
   <div class="flex flex-col min-h-[100dvh]">
     <!-- Header -->
-    <header class="bg-slate-800/80 backdrop-blur-sm border-b border-slate-700/50 px-4 py-2 sticky top-0 z-10">
+    <header class="bg-slate-800/80 backdrop-blur-sm border-b border-slate-700/50 px-4 py-2 sticky top-0 z-20">
       <div class="flex items-center justify-between">
         <h1 class="text-lg font-bold text-white tracking-tight">The Bench</h1>
-        <nav class="flex gap-1">
-          <button
-            v-for="tab in [
-              { key: 'game', label: 'Game' },
-              { key: 'roster', label: 'Roster' },
-              { key: 'history', label: 'History' },
-              { key: 'settings', label: 'Settings' },
-            ]"
-            :key="tab.key"
-            @click="currentView = tab.key"
-            :class="currentView === tab.key
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-400 hover:text-white'"
-            class="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
-          >
-            {{ tab.label }}
-          </button>
-        </nav>
+        <button
+          @click="menuOpen = !menuOpen"
+          class="text-slate-300 hover:text-white p-1 transition-colors"
+        >
+          <svg v-if="!menuOpen" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
+      <nav
+        v-if="menuOpen"
+        class="mt-2 flex flex-col gap-1"
+      >
+        <button
+          v-for="tab in [
+            { key: 'game', label: 'Game' },
+            { key: 'roster', label: 'Roster' },
+            { key: 'history', label: 'History' },
+            { key: 'settings', label: 'Settings' },
+          ]"
+          :key="tab.key"
+          @click="currentView = tab.key; menuOpen = false"
+          :class="currentView === tab.key
+            ? 'bg-blue-600 text-white'
+            : 'text-slate-300 hover:bg-slate-700/50'"
+          class="px-4 py-2 rounded-lg text-sm font-medium text-left transition-colors"
+        >
+          {{ tab.label }}
+        </button>
+      </nav>
     </header>
+    <!-- Backdrop to close menu -->
+    <div
+      v-if="menuOpen"
+      @click="menuOpen = false"
+      class="fixed inset-0 z-10"
+    />
 
     <!-- Main content -->
     <main class="flex-1 p-3">
