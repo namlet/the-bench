@@ -182,23 +182,10 @@ function updateSettings(newSettings) {
     <main class="flex-1 p-3">
       <!-- Game View -->
       <div v-if="currentView === 'game'" class="flex flex-col gap-3 h-full">
-        <GameControls
-          :gameActive="game.gameActive.value"
-          :gamePaused="game.gamePaused.value"
-          :isHalftime="game.isHalftime.value"
-          :rosterSize="game.activeTeam.value ? game.roster.value.length : 0"
-          :swapSuggestions="swapSuggestions"
-          :gameElapsedMs="gameElapsedMs()"
-          @start="game.startGame"
-          @pause="game.pauseGame"
-          @resume="game.resumeGame"
-          @halftime="game.halftime"
-          @end="game.endGame"
-        />
-
-        <div v-if="!game.gameActive.value" class="py-4">
+        <!-- Pre-game: team selector + start button, centered -->
+        <div v-if="!game.gameActive.value" class="flex-1 flex flex-col items-center justify-center py-4">
           <!-- Team selector on game page -->
-          <div v-if="game.teams.value.length" class="mb-4">
+          <div v-if="game.teams.value.length" class="mb-4 w-full max-w-sm">
             <div class="text-xs text-slate-400 uppercase tracking-wider mb-2 px-1">Select Team</div>
             <div class="space-y-1">
               <button
@@ -216,15 +203,44 @@ function updateSettings(newSettings) {
             </div>
           </div>
 
-          <div class="text-center text-slate-500 text-sm">
-            <p v-if="!game.teams.value.length">Create a team in the Teams menu to get started.</p>
-            <p v-else-if="!game.activeTeam.value">Select a team above.</p>
-            <p v-else-if="game.roster.value.length === 0">Add players to {{ game.activeTeam.value.name }} in the Teams menu.</p>
+          <div class="w-full max-w-sm">
+            <div v-if="!game.teams.value.length" class="text-center text-slate-500 text-sm">
+              <p>Create a team in the Teams menu to get started.</p>
+            </div>
+            <div v-else-if="!game.activeTeam.value" class="text-center text-slate-500 text-sm">
+              <p>Select a team above.</p>
+            </div>
+            <div v-else-if="game.roster.value.length === 0" class="text-center text-slate-500 text-sm">
+              <p>Add players to {{ game.activeTeam.value.name }} in the Teams menu.</p>
+            </div>
+            <button
+              v-else
+              @click="game.startGame"
+              class="w-full bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-4 rounded-xl text-lg transition-colors"
+            >
+              Start Game
+            </button>
           </div>
         </div>
 
-        <div v-else class="grid grid-cols-2 gap-3 flex-1">
-          <FieldColumn
+        <!-- Active game: controls + field/bench -->
+        <template v-else>
+          <GameControls
+            :gameActive="game.gameActive.value"
+            :gamePaused="game.gamePaused.value"
+            :isHalftime="game.isHalftime.value"
+            :rosterSize="game.activeTeam.value ? game.roster.value.length : 0"
+            :swapSuggestions="swapSuggestions"
+            :gameElapsedMs="gameElapsedMs()"
+            @start="game.startGame"
+            @pause="game.pauseGame"
+            @resume="game.resumeGame"
+            @halftime="game.halftime"
+            @end="game.endGame"
+          />
+
+          <div class="grid grid-cols-2 gap-3 flex-1">
+            <FieldColumn
             :fieldPlayers="game.fieldPlayers.value"
             :goalie="game.goalie.value"
             :gameActive="game.gameActive.value"
@@ -254,8 +270,9 @@ function updateSettings(newSettings) {
             @update:benchPlayers="game.benchPlayers.value = $event"
             @move-to-field="handleMoveToField"
             @change="onBenchChange"
-          />
-        </div>
+            />
+          </div>
+        </template>
       </div>
 
       <!-- Roster View -->

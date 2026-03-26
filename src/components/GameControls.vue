@@ -46,17 +46,7 @@ function doEnd() {
 
     <!-- Buttons -->
     <div class="flex gap-2 justify-center flex-wrap">
-      <template v-if="!gameActive">
-        <button
-          @click="$emit('start')"
-          :disabled="rosterSize < 1"
-          class="bg-green-600 hover:bg-green-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold px-8 py-4 rounded-xl text-lg w-full transition-colors"
-        >
-          Start Game
-        </button>
-      </template>
-
-      <template v-else>
+      <template v-if="gameActive">
         <button
           v-if="!gamePaused"
           @click="$emit('pause')"
